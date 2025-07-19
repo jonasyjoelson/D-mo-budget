@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DÉMO - Gestionnaire de Boutique Madagascar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f9f9; }
+        .app { max-width: 400px; margin: 0 auto; background: white; min-height: 100vh; position: relative; }
+        .demo-banner { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 0.5rem; text-align: center; font-weight: bold; font-size: 0.75rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        .header { background: #059669; color: white; padding: 1rem; text-align: center; }
+        .header h1 { font-size: 1.25rem; font-weight: bold; }
+        .header p { font-size: 0.875rem; opacity: 0.9; }
+        .nav { display: flex; background: #f3f4f6; }
+        .nav button { flex: 1; padding: 0.75rem; border: none; background: none; font-size: 0.875rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.3s; }
+        .nav button.active { background: white; color: #059669; border-bottom-color: #059669; }
+        .nav button:hover { background: #e5e7eb; }
+        .content { padding: 1rem; }
+        .success-highlight { background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 2px solid #10b981; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; animation: glow 3s infinite; }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.3); } 50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); } }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; }
+        .form-control { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 0.875rem; }
+        .btn { padding: 0.75rem 1rem; border: none; border-radius: 0.5rem; font-size: 0.875rem; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+        .btn-primary { background: #059669; color: white; }
+        .btn-primary:hover { background: #047857; transform: translateY(-1px); }
+        .btn-add { background: none; border: 2px dashed #a7f3d0; color: #059669; width: 100%; padding: 0.75rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s; }
+        .btn-add:hover { background: #ecfdf5; border-color: #10b981; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+        .card { background: #f9f9f9; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 0.75rem; position: relative; transition: all 0.3s; }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .card-green { background: #ecfdf5; border-left: 4px solid #10b981; }
+        .card-red { background: #fef2f2; border-left: 4px solid #ef4444; }
+        .card-blue { background: #eff6ff; border-left: 4px solid #3b82f6; }
+        .stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .stat { background: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; text-align: center; transition: all 0.3s; }
+        .stat:hover { transform: scale(1.05); }
+        .stat-green { background: #ecfdf5; }
+        .stat-red { background: #fef2f2; }
+        .stat-blue { background: #eff6ff; }
+        .delete-btn { position: absolute; top: 0.5rem; right: 0.5rem; width: 1.5rem; height: 1.5rem; background: #dc2626; color: white; border: none; border-radius: 50%; font-size: 0.75rem; cursor: pointer; }
+        .text-center { text-align: center; }
+        .text-green { color: #059669; }
+        .text-red { color: #dc2626; }
+        .text-gray { color: #6b7280; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .font-bold { font-weight: bold; }
+        .font-medium { font-weight: 500; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .hidden { display: none; }
+        .transactions { max-height: 15rem; overflow-y: auto; }
+        .transaction { background: #f9f9f9; padding: 0.5rem; border-radius: 0.375rem; margin-bottom: 0.5rem; font-size: 0.875rem; animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
+        .transaction-vente { background: #ecfdf5; border-left: 2px solid #10b981; }
+        .transaction-depense { background: #fef2f2; border-left: 2px solid #ef4444; }
+        .flex { display: flex; }
+        .justify-between { justify-content: space-between; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 0.5rem; }
+        .profit-badge { background: #10b981; color: white; padding: 0.25rem 0.5rem; border-radius: 1rem; font-size: 0.75rem; font-weight: bold; }
+        .demo-tip { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem; padding: 0.75rem; margin: 1rem 0; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } 60% { transform: translateY(-3px); } }
+        .cta-section { background: linear-gradient(135deg, #059669, #047857); color: white; padding: 1.5rem; margin: 1rem 0; border-radius: 0.5rem; text-align: center; }
+        .cta-button { background: white; color: #059669; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; font-weight: bold; margin-top: 1rem; cursor: pointer; transition: all 0.3s; }
+        .cta-button:hover { transform: scale(1.05); }
+        .roi-calculator { background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Bannière démo -->
+        <div class="demo-banner">
+            🎯 DÉMONSTRATION INTERACTIVE - Cliquez et explorez !
+        </div>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>Gestionnaire de Boutique</h1>
+            <p>Madagascar - Version Professionnelle</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button id="tab-planification" class="active" onclick="switchTab('planification')">
+                📊 Planification
+            </button>
+            <button id="tab-quotidien" onclick="switchTab('quotidien')">
+                📈 Quotidien
+            </button>
+        </div>
+
+        <!-- Contenu Planification -->
+        <div id="content-planification" class="content">
+            <!-- Mise en avant du succès -->
+            <div class="success-highlight">
+                <h3 class="font-bold text-green mb-2">🎉 Boutique Rentable !</h3>
+                <p class="text-sm">Votre activité peut générer <strong>127 500 Ar de bénéfice</strong> avec un investissement de 85 000 Ar</p>
+                <div class="profit-badge" style="margin-top: 0.5rem;">ROI: +150%</div>
+            </div>
+
+            <div class="form-group mb-6">
+                <label>💰 Capital disponible (Ar)</label>
+                <input type="number" id="capital" class="form-control" value="100000" onchange="updateCalculations()">
+                <p class="text-xs text-gray mt-1">Modifiez pour voir l'impact sur vos bénéfices</p>
+            </div>
+
+            <!-- Astuce démo -->
+            <div class="demo-tip">
+                <strong>💡 Astuce :</strong> Ajoutez vos propres produits en cliquant ci-dessous !
+            </div>
+
+            <!-- Ajouter produit -->
+            <div class="mb-3">
+                <button id="btn-add-product" class="btn-add" onclick="toggleProductForm()">
+                    ➕ Ajouter votre produit
+                </button>
+                
+                <div id="product-form" class="card-green hidden">
+                    <h4 class="font-medium mb-3">🆕 Nouveau produit</h4>
+                    <div class="form-group">
+                        <input type="text" id="new-product-name" class="form-control" placeholder="Ex: Savon, Café, Biscuits...">
+                    </div>
+                    <div class="grid-3 mb-3">
+                        <input type="number" id="new-product-cost" class="form-control" placeholder="Coût achat">
+                        <input type="number" id="new-product-price" class="form-control" placeholder="Prix vente">
+                        <input type="number" id="new-product-quantity" class="form-control" placeholder="Quantité">
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="btn btn-primary" onclick="addProduct()" style="flex: 1;">Ajouter</button>
+                        <button class="btn" style="background: #6b7280; color: white;" onclick="cancelProductForm()">Annuler</button>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="font-bold mb-3">🛒 Vos produits à vendre (<span id="product-count">5</span>)</h3>
+            <div id="products-list"></div>
+
+            <!-- Calculateur ROI -->
+            <div class="roi-calculator">
+                <h4 class="font-bold mb-2">📈 Calculateur de Rentabilité</h4>
+                <div class="text-sm">
+                    <p><strong>Si vous vendez tout :</strong></p>
+                    <p>• Temps estimé : <span class="text-green font-bold">2-3 semaines</span></p>
+                    <p>• Bénéfice par jour : <span class="text-green font-bold">6 375 Ar</span></p>
+                    <p>• Votre salaire mensuel : <span class="text-green font-bold">191 250 Ar</span></p>
+                </div>
+            </div>
+
+            <!-- Résumé financier -->
+            <div class="card-blue">
+                <h4 class="font-bold mb-3">💼 Analyse Financière Complète</h4>
+                <div class="text-sm">
+                    <div class="flex justify-between mb-2">
+                        <span>Investissement total:</span>
+                        <span class="font-medium" id="total-investment">85 000 Ar</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span>Chiffre d'affaires potentiel:</span>
+                        <span class="font-medium" id="potential-revenue">212 500 Ar</span>
+                    </div>
+                    <div class="flex justify-between mb-2">
+                        <span>Bénéfice net potentiel:</span>
+                        <span class="font-medium text-green" id="potential-profit">127 500 Ar</span>
+                    </div>
+                    <div class="flex justify-between mb-3">
+                        <span>Marge bénéficiaire:</span>
+                        <span class="font-medium" id="global-margin">60.0%</span>
+                    </div>
+                    <div class="card" style="margin: 0; padding: 0.75rem; background: white;">
+                        <div class="text-xs font-medium text-green" id="feasibility-text">
+                            ✅ EXCELLENTE OPPORTUNITÉ ! Votre capital suffit largement
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <h3 class="font-bold mb-2">🚀 Prêt à démarrer votre business ?</h3>
+                <p class="text-sm mb-2">Cette application vous fera économiser des heures et éviter les pertes !</p>
+                <button class="cta-button" onclick="showPurchaseInfo()">
+                    Acheter maintenant - 15 000 Ar
+                </button>
+            </div>
+        </div>
+
+        <!-- Contenu Quotidien -->
+        <div id="content-quotidien" class="content hidden">
+            <!-- Tableau de bord impressionnant -->
+            <div class="stats mb-6">
+                <div class="stat stat-green">
+                    <div class="text-xs text-gray">💰 Ventes jour</div>
+                    <div class="font-bold text-sm" id="daily-sales">25 400</div>
+                    <div class="text-xs text-green">+12% vs hier</div>
+                </div>
+                <div class="stat stat-red">
+                    <div class="text-xs text-gray">💸 Dépenses</div>
+                    <div class="font-bold text-sm" id="daily-expenses">8 200</div>
+                    <div class="text-xs text-red">Transport, etc.</div>
+                </div>
+                <div class="stat stat-blue">
+                    <div class="text-xs text-gray">📈 Bénéfice</div>
+                    <div class="font-bold text-sm" id="daily-profit">17 200</div>
+                    <div class="text-xs text-green">Excellent !</div>
+                </div>
+            </div>
+
+            <!-- Astuce interactive -->
+            <div class="demo-tip">
+                <strong>💡 Essayez :</strong> Cliquez sur "Vente rapide" pour voir la magie opérer !
+            </div>
+
+            <!-- Formulaire de vente -->
+            <div class="card-green mb-3">
+                <h4 class="font-medium mb-3">🛒 Nouvelle vente</h4>
+                <div class="grid-2 mb-3">
+                    <select id="sale-product" class="form-control">
+                        <option value="">Choisir produit</option>
+                        <option value="Sucre (1kg)">Sucre (1kg) - 3000 Ar</option>
+                        <option value="Riz (1kg)">Riz (1kg) - 2200 Ar</option>
+                        <option value="Huile (1L)">Huile (1L) - 4200 Ar</option>
+                        <option value="Savon">Savon - 800 Ar</option>
+                        <option value="Café">Café - 1500 Ar</option>
+                    </select>
+                    <input type="number" id="sale-quantity" class="form-control" placeholder="Quantité" value="2">
+                </div>
+                <div class="grid-2 gap-2">
+                    <button class="btn btn-primary" onclick="addSale()">💰 Enregistrer vente</button>
+                    <button class="btn" style="background: #f59e0b; color: white;" onclick="quickSale()">⚡ Vente rapide</button>
+                </div>
+            </div>
+
+            <!-- Formulaire dépense -->
+            <div class="card-red mb-3">
+                <h4 class="font-medium mb-3">💸 Nouvelle dépense</h4>
+                <div class="grid-2 mb-3">
+                    <select id="expense-description" class="form-control">
+                        <option value="">Type de dépense</option>
+                        <option value="Transport">Transport</option>
+                        <option value="Achat stock">Achat stock</option>
+                        <option value="Loyer boutique">Loyer boutique</option>
+                        <option value="Repas">Repas</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                    <input type="number" id="expense-amount" class="form-control" placeholder="Montant (Ar)" value="1500">
+                </div>
+                <button class="btn" style="background: #dc2626; color: white; width: 100%;" onclick="addExpense()">➖ Enregistrer dépense</button>
+            </div>
+
+            <!-- Historique des transactions -->
+            <div id="transactions-history">
+                <h4 class="font-medium mb-3">📋 Transactions d'aujourd'hui</h4>
+                <div class="transactions" id="transactions-list"></div>
+            </div>
+
+            <!-- Conseils business -->
+            <div class="card-blue">
+                <h4 class="font-bold mb-2">🎯 Conseil du jour</h4>
+                <p class="text-sm">Vos meilleures ventes : Huile et Sucre. Pensez à augmenter le stock !</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Données de démonstration réalistes
+        let products = [
+            { nom: 'Sucre (1kg)', coutAchat: 2500, prixVente: 3000, quantite: 15 },
+            { nom: 'Riz (1kg)', coutAchat: 1800, prixVente: 2200, quantite: 25 },
+            { nom: 'Huile (1L)', coutAchat: 3500, prixVente: 4200, quantite: 8 },
+            { nom: 'Savon', coutAchat: 500, prixVente: 800, quantite: 30 },
+            { nom: 'Café', coutAchat: 1200, prixVente: 1500, quantite: 20 }
+        ];
+
+        let sales = [
+            { id: 1, produit: 'Huile (1L)', quantite: 2, montant: 8400, date: '09:15' },
+            { id: 2, produit: 'Sucre (1kg)', quantite: 3, montant: 9000, date: '10:30' },
+            { id: 3, produit: 'Savon', quantite: 4, montant: 3200, date: '11:45' },
+            { id: 4, produit: 'Riz (1kg)', quantite: 2, montant: 4400, date: '14:20' }
+        ];
+
+        let expenses = [
+            { id: 1, description: 'Transport', montant: 2000, date: '08:00' },
+            { id: 2, description: 'Repas', montant: 1500, date: '12:00' },
+            { id: 3, description: 'Achat stock', montant: 4700, date: '16:00' }
+        ];
+
+        let currentTab = 'planification';
+
+        // Navigation avec animations
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Animation des onglets
+            document.querySelectorAll('.nav button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            
+            document.getElementById('content-planification').classList.toggle('hidden', tab !== 'planification');
+            document.getElementById('content-quotidien').classList.toggle('hidden', tab !== 'quotidien');
+            
+            if (tab === 'quotidien') {
+                renderTransactions();
+                updateDashboard();
+            } else {
+                renderProducts();
+                updateCalculations();
+            }
+        }
+
+        // Gestion des produits
+        function toggleProductForm() {
+            const form = document.getElementById('product-form');
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('new-product-name').focus();
+            }
+        }
+
+        function cancelProductForm() {
+            document.getElementById('product-form').classList.add('hidden');
+            clearProductForm();
+        }
+
+        function clearProductForm() {
+            document.getElementById('new-product-name').value = '';
+            document.getElementById('new-product-cost').value = '';
+            document.getElementById('new-product-price').value = '';
+            document.getElementById('new-product-quantity').value = '';
+        }
+
+        function addProduct() {
+            const name = document.getElementById('new-product-name').value;
+            const cost = parseInt(document.getElementById('new-product-cost').value) || 0;
+            const price = parseInt(document.getElementById('new-product-price').value) || 0;
+            const quantity = parseInt(document.getElementById('new-product-quantity').value) || 0;
+
+            if (name && cost && price && quantity) {
+                products.push({ nom: name, coutAchat: cost, prixVente: price, quantite: quantity });
+                clearProductForm();
+                cancelProductForm();
+                renderProducts();
+                updateCalculations();
+                
+                // Animation de succès
+                showSuccessMessage(`✅ ${name} ajouté avec succès !`);
+            }
+        }
+
+        function deleteProduct(index) {
+            if (confirm('Supprimer ce produit ?')) {
+                const productName = products[index].nom;
+                products.splice(index, 1);
+                renderProducts();
+                updateCalculations();
+                showSuccessMessage(`🗑️ ${productName} supprimé`);
+            }
+        }
+
+        function updateProduct(index, field, value) {
+            products[index][field] = parseInt(value) || 0;
+            updateCalculations();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-list');
+            document.getElementById('product-count').textContent = products.length;
+
+            container.innerHTML = products.map((product, index) => `
+                <div class="card">
+                    <button class="delete-btn" onclick="deleteProduct(${index})" title="Supprimer">×</button>
+                    <div class="font-medium text-sm mb-2" style="padding-right: 2rem;">${product.nom}</div>
+                    <div class="grid-3 text-xs mb-2">
+                        <div>
+                            <label class="text-gray">Coût achat</label>
+                            <input type="number" value="${product.coutAchat}" 
+                                   onchange="updateProduct(${index}, 'coutAchat', this.value)"
+                                   class="form-control text-xs" style="padding: 0.25rem;">
+                        </div>
+                        <div>
+                            <label class="text-gray">Prix vente</label>
+                            <input type="number" value="${product.prixVente}" 
+                                   onchange="updateProduct(${index}, 'prixVente', this.value)"
+                                   class="form-control text-xs" style="padding: 0.25rem;">
+                        </div>
+                        <div>
+                            <label class="text-gray">Quantité</label>
+                            <input type="number" value="${product.quantite}" 
+                                   onchange="updateProduct(${index}, 'quantite', this.value)"
+                                   class="form-control text-xs" style="padding: 0.25rem;">
+                        </div>
+                    </div>
+                    <div class="text-xs">
+                        <span class="text-green font-medium">
+                            Marge: ${product.prixVente - product.coutAchat} Ar 
+                            (${product.prixVente > 0 ? (((product.prixVente - product.coutAchat) / product.prixVente * 100)).toFixed(1) : 0}%)
+                        </span>
+                        <span style="float: right;" class="text-gray">
+                            Total: ${(product.prixVente * product.quantite).toLocaleString()} Ar
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateCalculations() {
+            const investment = products.reduce((total, p) => total + (p.coutAchat * p.quantite), 0);
+            const revenue = products.reduce((total, p) => total + (p.prixVente * p.quantite), 0);
+            const profit = revenue - investment;
+            const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
+            const capital = parseInt(document.getElementById('capital').value) || 0;
+
+            document.getElementById('total-investment').textContent = investment.toLocaleString() + ' Ar';
+            document.getElementById('potential-revenue').textContent = revenue.toLocaleString() + ' Ar';
+            document.getElementById('potential-profit').textContent = profit.toLocaleString() + ' Ar';
+            document.getElementById('global-margin').textContent = margin + '%';
+
+            const feasibilityEl = document.getElementById('feasibility-text');
+            if (investment <= capital) {
+                feasibilityEl.textContent = '✅ EXCELLENTE OPPORTUNITÉ ! Votre capital suffit largement';
+                feasibilityEl.className = 'text-xs font-medium text-green';
+            } else {
+                feasibilityEl.textContent = `⚠️ Capital insuffisant (manque ${(investment - capital).toLocaleString()} Ar)`;
+                feasibilityEl.className = 'text-xs font-medium text-red';
+            }
+        }
+
+        // Gestion quotidienne
+        function addSale() {
+            const productName = document.getElementById('sale-product').value;
+            const quantity = parseInt(document.getElementById('sale-quantity').value) || 0;
+            
+            if (productName && quantity) {
+                const product = products.find(p => p.nom === productName);
+                if (product) {
+                    const newSale = {
+                        id: Date.now(),
+                        produit: productName,
+                        quantite: quantity,
+                        montant: product.prixVente * quantity,
+                        date: new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})
+                    };
+                    
+                    sales.push(newSale);
+                    document.getElementById('sale-product').value = '';
+                    document.getElementById('sale-quantity').value = '';
+                    updateDashboard();
+                    renderTransactions();
+                    
+                    showSuccessMessage(`💰 Vente enregistrée: +${newSale.montant.toLocaleString()} Ar`);
+                }
+            }
+        }
+
+        function quickSale() {
+            const quickSales = [
+                { produit: 'Sucre (1kg)', quantite: 2, montant: 6000 },
+                { produit: 'Huile (1L)', quantite: 1, montant: 4200 },
+                { produit: 'Savon', quantite: 3, montant: 2400 }
+            ];
+            
+            const randomSale = quickSales[Math.floor(Math.random() * quickSales.length)];
+            randomSale.id = Date.now();
+            randomSale.date = new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+            
+            sales.push(randomSale);
+            updateDashboard();
+            renderTransactions();
+            
+            showSuccessMessage(`⚡ Vente rapide: ${randomSale.produit} - ${randomSale.montant.toLocaleString()} Ar`);
+        }
+
+        function addExpense() {
+            const description = document.getElementById('expense-description').value;
+            const amount = parseInt(document.getElementById('expense-amount').value) || 0;
+            
+            if (description && amount) {
+                const newExpense = {
+                    id: Date.now(),
+                    description: description,
+                    montant: amount,
+                    date: new Date().toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'})
+                };
+                
+                expenses.push(newExpense);
+                document.getElementById('expense-description').value = '';
+                document.getElementById('expense-amount').value = '';
+                updateDashboard();
+                renderTransactions();
+                
+                showSuccessMessage(`💸 Dépense enregistrée: -${amount.toLocaleString()} Ar`);
+            }
+        }
+
+        function updateDashboard() {
+            const totalSales = sales.reduce((total, s) => total + s.montant, 0);
+            const totalExpenses = expenses.reduce((total, e) => total + e.montant, 0);
+            const profit = totalSales - totalExpenses;
+
+            document.getElementById('daily-sales').textContent = totalSales.toLocaleString();
+            document.getElementById('daily-expenses').textContent = totalExpenses.toLocaleString();
+            document.getElementById('daily-profit').textContent = profit.toLocaleString();
+        }
+
+        function renderTransactions() {
+            const container = document.getElementById('transactions-list');
+            const allTransactions = [
+                ...sales.map(s => ({...s, type: 'vente'})),
+                ...expenses.map(e => ({...e, type: 'depense'}))
+            ].sort((a, b) => b.id - a.id).slice(0, 8);
+
+            container.innerHTML = allTransactions.map(t => `
+                <div class="transaction transaction-${t.type}">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-medium">
+                                ${t.type === 'vente' ? '💰' : '💸'} ${t.type === 'vente' ? t.produit : t.description}
+                            </div>
+                            <div class="text-xs text-gray">
+                                ${t.date} ${t.quantite ? `• Qté: ${t.quantite}` : ''}
+                            </div>
+                        </div>
+                        <div class="font-bold ${t.type === 'vente' ? 'text-green' : 'text-red'}">
+                            ${t.type === 'vente' ? '+' : '-'}${t.montant.toLocaleString()} Ar
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function showSuccessMessage(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                background: #10b981; color: white; padding: 1rem; border-radius: 0.5rem;
+                font-weight: bold; z-index: 9999; animation: slideDown 0.3s ease-out;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease-out';
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 2000);
+        }
+
+        function showPurchaseInfo() {
+            alert(`🎯 ACHETEZ MAINTENANT !\n\n💰 Prix: 15 000 Ar seulement\n📱 Contact: +261 XX XXX XXXX\n💳 Paiement: Mobile Money, Orange Money\n\n✅ Accès immédiat après paiement\n🔄 Mises à jour gratuites\n📞 Support technique inclus`);
+        }
+
+        // Animations et CSS dynamiques
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown { from { transform: translateX(-50%) translateY(-100%); } to { transform: translateX(-50%) translateY(0); } }
+            @keyframes slideUp { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-100%); } }
+        `;
+        document.head.appendChild(style);
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProducts();
+            updateCalculations();
+            updateDashboard();
+            renderTransactions();
+            
+            // Auto-update pour dynamisme
+            setInterval(() => {
+                if (Math.random() < 0.1) { // 10% de chance toutes les 5 secondes
+                    quickSale();
+                }
+            }, 5000);
+        });
+    </script>
+</body>
+</html>
+
